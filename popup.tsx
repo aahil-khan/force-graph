@@ -1,26 +1,42 @@
-import { useState } from "react"
+import { useEffect, useRef } from "react"
+import ForceGraph from "force-graph"
+import "./popup.css"
 
 function IndexPopup() {
-  const [data, setData] = useState("")
+  const ref = useRef<HTMLDivElement>(null)
 
-  return (
-    <div
-      style={{
-        padding: 16
-      }}>
-      <h2>
-        Welcome to your{" "}
-        <a href="https://www.plasmo.com" target="_blank">
-          Plasmo
-        </a>{" "}
-        Extension!
-      </h2>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
-      <a href="https://docs.plasmo.com" target="_blank">
-        View Docs
-      </a>
-    </div>
-  )
+  useEffect(() => {
+    if (!ref.current) return
+
+    const width = 360
+    const height = 360
+
+    // 🔑 TypeScript fix: tell TS this is callable
+    const fg = (ForceGraph as any)()(ref.current)
+
+    fg.width(width)
+      .height(height)
+      .backgroundColor("#111")
+      .nodeColor(() => "orange")
+      .linkColor(() => "#888")
+      .graphData({
+        nodes: [
+          { id: "A" },
+          { id: "B" },
+          { id: "C" }
+        ],
+        links: [
+          { source: "A", target: "B" },
+          { source: "B", target: "C" }
+        ]
+      })
+
+    return () => {
+      fg._destructor?.()
+    }
+  }, [])
+
+  return <div ref={ref} />
 }
 
 export default IndexPopup
